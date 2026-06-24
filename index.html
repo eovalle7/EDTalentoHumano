@@ -1,0 +1,726 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Evaluaciones de DesempeÃ±o â€” Grupo CHESA</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --chesa-black:   #111111;
+      --chesa-dark:    #1E1E1E;
+      --chesa-gray1:   #F4F4F2;
+      --chesa-gray2:   #E5E5E3;
+      --chesa-gray3:   #BCBCBA;
+      --chesa-gray4:   #6B6B69;
+      --chesa-red:     #C62828;
+      --chesa-red-lt:  #FFEBEE;
+      --chesa-red-dk:  #8E1919;
+      --chesa-green:   #1B6E3A;
+      --chesa-green-lt:#E8F5E9;
+      --chesa-amber:   #B45309;
+      --chesa-amber-lt:#FFF8E1;
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--chesa-gray1);
+      color: var(--chesa-black);
+      min-height: 100vh;
+    }
+
+    /* â”€â”€ Layout â”€â”€ */
+    .app { display: flex; min-height: 100vh; }
+
+    /* â”€â”€ Sidebar â”€â”€ */
+    .sidebar {
+      width: 220px;
+      flex-shrink: 0;
+      background: var(--chesa-black);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+    }
+    .sidebar-logo {
+      padding: 1.5rem 1.25rem 1.25rem;
+      border-bottom: 0.5px solid rgba(255,255,255,0.1);
+    }
+    .sidebar-logo img { height: 36px; filter: invert(1) brightness(2); }
+    .sidebar-logo-sub {
+      font-size: 11px;
+      color: rgba(255,255,255,0.45);
+      margin-top: 6px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .nav { padding: 0.75rem 0; flex: 1; }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 1.25rem;
+      font-size: 13px;
+      color: rgba(255,255,255,0.55);
+      cursor: pointer;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      transition: background 0.1s, color 0.1s;
+    }
+    .nav-item i { font-size: 16px; }
+    .nav-item:hover { background: rgba(255,255,255,0.07); color: #fff; }
+    .nav-item.active { background: rgba(198,40,40,0.18); color: #fff; border-left: 3px solid var(--chesa-red); padding-left: calc(1.25rem - 3px); }
+    .sidebar-footer {
+      padding: 1rem 1.25rem;
+      border-top: 0.5px solid rgba(255,255,255,0.1);
+      font-size: 11px;
+      color: rgba(255,255,255,0.3);
+    }
+
+    /* â”€â”€ Main â”€â”€ */
+    .main { margin-left: 220px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* â”€â”€ Topbar â”€â”€ */
+    .topbar {
+      background: #fff;
+      border-bottom: 0.5px solid var(--chesa-gray2);
+      padding: 0 1.75rem;
+      height: 56px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 10;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 12px; }
+    .topbar-title { font-size: 15px; font-weight: 600; color: var(--chesa-black); }
+    .breadcrumb { font-size: 12px; color: var(--chesa-gray4); }
+    .role-switcher { display: flex; gap: 4px; }
+    .role-btn {
+      font-size: 12px; padding: 5px 12px;
+      border: 0.5px solid var(--chesa-gray3);
+      border-radius: var(--radius-sm);
+      cursor: pointer; background: transparent;
+      color: var(--chesa-gray4);
+      transition: all 0.1s;
+    }
+    .role-btn:hover { border-color: var(--chesa-black); color: var(--chesa-black); }
+    .role-btn.active {
+      background: var(--chesa-black); color: #fff;
+      border-color: var(--chesa-black); font-weight: 500;
+    }
+
+    /* â”€â”€ Content â”€â”€ */
+    .content { padding: 1.75rem; display: flex; flex-direction: column; gap: 1.25rem; flex: 1; }
+
+    /* â”€â”€ Metric cards â”€â”€ */
+    .metric-grid { display: grid; gap: 12px; }
+    .metric-grid-4 { grid-template-columns: repeat(4, 1fr); }
+    .metric-grid-3 { grid-template-columns: repeat(3, 1fr); }
+    .metric-card {
+      background: #fff;
+      border: 0.5px solid var(--chesa-gray2);
+      border-radius: var(--radius-lg);
+      padding: 1.1rem 1.25rem;
+    }
+    .metric-label { font-size: 12px; color: var(--chesa-gray4); margin-bottom: 6px; }
+    .metric-value { font-size: 26px; font-weight: 600; color: var(--chesa-black); line-height: 1; }
+    .metric-sub { font-size: 12px; margin-top: 5px; }
+    .metric-sub.up { color: var(--chesa-green); }
+    .metric-sub.warn { color: var(--chesa-amber); }
+    .metric-accent { border-top: 3px solid var(--chesa-red); }
+
+    /* â”€â”€ Section card â”€â”€ */
+    .section-card {
+      background: #fff;
+      border: 0.5px solid var(--chesa-gray2);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem 1.5rem;
+    }
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1.1rem;
+    }
+    .section-title { font-size: 14px; font-weight: 600; }
+
+    /* â”€â”€ Badges â”€â”€ */
+    .badge {
+      display: inline-flex; align-items: center;
+      padding: 3px 9px; border-radius: var(--radius-sm);
+      font-size: 11px; font-weight: 500; white-space: nowrap;
+    }
+    .badge-success { background: var(--chesa-green-lt); color: var(--chesa-green); }
+    .badge-warn    { background: var(--chesa-amber-lt); color: var(--chesa-amber); }
+    .badge-danger  { background: var(--chesa-red-lt);   color: var(--chesa-red);   }
+    .badge-neutral { background: var(--chesa-gray2);    color: var(--chesa-gray4); }
+    .badge-dark    { background: var(--chesa-black);    color: #fff; }
+
+    /* â”€â”€ Table â”€â”€ */
+    .table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .table th {
+      text-align: left; padding: 7px 10px;
+      color: var(--chesa-gray4); font-weight: 500; font-size: 11px;
+      border-bottom: 0.5px solid var(--chesa-gray2);
+      text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .table td { padding: 10px 10px; border-bottom: 0.5px solid var(--chesa-gray1); }
+    .table tr:last-child td { border-bottom: none; }
+    .table tbody tr:hover td { background: var(--chesa-gray1); }
+
+    /* â”€â”€ Avatar â”€â”€ */
+    .avatar {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: var(--chesa-black); color: #fff;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 600; flex-shrink: 0;
+    }
+    .emp-cell { display: flex; align-items: center; gap: 9px; }
+
+    /* â”€â”€ Progress â”€â”€ */
+    .progress-bar {
+      height: 5px; background: var(--chesa-gray2);
+      border-radius: 3px; overflow: hidden; flex: 1; min-width: 60px;
+    }
+    .progress-fill { height: 100%; border-radius: 3px; transition: width 0.4s; }
+    .progress-row { display: flex; align-items: center; gap: 8px; }
+
+    /* â”€â”€ Stars â”€â”€ */
+    .star     { color: #C62828; font-size: 15px; }
+    .star.off { color: var(--chesa-gray2); }
+
+    /* â”€â”€ KPI row â”€â”€ */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: 1fr 72px 72px 140px;
+      align-items: center; gap: 12px;
+      padding: 9px 0;
+      border-bottom: 0.5px solid var(--chesa-gray1);
+    }
+    .kpi-row:last-child { border-bottom: none; }
+
+    /* â”€â”€ Tabs â”€â”€ */
+    .tab-bar { display: flex; gap: 2px; margin-bottom: 1rem; border-bottom: 0.5px solid var(--chesa-gray2); }
+    .tab {
+      padding: 7px 14px; font-size: 12px; cursor: pointer;
+      border: none; background: none; color: var(--chesa-gray4);
+      border-bottom: 2px solid transparent; margin-bottom: -0.5px;
+    }
+    .tab:hover { color: var(--chesa-black); }
+    .tab.active { color: var(--chesa-red); font-weight: 500; border-bottom-color: var(--chesa-red); }
+
+    /* â”€â”€ Competencia row â”€â”€ */
+    .comp-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .comp-label { font-size: 12px; width: 160px; flex-shrink: 0; color: var(--chesa-black); }
+    .comp-score { font-size: 12px; font-weight: 600; width: 24px; text-align: right; }
+
+    /* â”€â”€ 360 panel grid â”€â”€ */
+    .panel-360 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .eval-block {
+      background: var(--chesa-gray1);
+      border: 0.5px solid var(--chesa-gray2);
+      border-radius: var(--radius-md); padding: 1rem;
+    }
+    .eval-block-title { font-size: 11px; color: var(--chesa-gray4); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.04em; }
+
+    /* â”€â”€ Score circle â”€â”€ */
+    .score-circle {
+      width: 38px; height: 38px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 600;
+    }
+
+    /* â”€â”€ Report cards â”€â”€ */
+    .report-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .report-card {
+      border: 0.5px solid var(--chesa-gray2);
+      border-radius: var(--radius-md); padding: 1.1rem;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .report-card i { font-size: 22px; color: var(--chesa-gray4); }
+    .report-card-title { font-size: 13px; font-weight: 600; }
+    .report-card-desc  { font-size: 12px; color: var(--chesa-gray4); flex: 1; }
+
+    /* â”€â”€ Action button â”€â”€ */
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 12px; padding: 6px 14px;
+      border: 0.5px solid var(--chesa-gray3);
+      border-radius: var(--radius-sm);
+      cursor: pointer; background: transparent;
+      color: var(--chesa-black);
+      transition: all 0.1s;
+    }
+    .btn:hover { background: var(--chesa-gray1); }
+    .btn-primary { background: var(--chesa-red); color: #fff; border-color: var(--chesa-red); }
+    .btn-primary:hover { background: var(--chesa-red-dk); border-color: var(--chesa-red-dk); }
+
+    /* â”€â”€ Cycle badge â”€â”€ */
+    .cycle-chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: var(--chesa-black); color: #fff;
+      font-size: 11px; padding: 3px 10px; border-radius: var(--radius-sm);
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- Sidebar -->
+  <nav class="sidebar" role="navigation" aria-label="MenÃº principal">
+    <div class="sidebar-logo">
+      <img src="Logo CHESA.jpeg" alt="Grupo CHESA AutomotrÃ­z" />
+      <div class="sidebar-logo-sub">Evaluaciones de desempeÃ±o</div>
+    </div>
+    <div class="nav">
+      <button class="nav-item active" onclick="showPage('dashboard')">
+        <i class="ti ti-layout-dashboard" aria-hidden="true"></i>Dashboard
+      </button>
+      <button class="nav-item" onclick="showPage('360')">
+        <i class="ti ti-rotate-360" aria-hidden="true"></i>EvaluaciÃ³n 360Â°
+      </button>
+      <button class="nav-item" onclick="showPage('kpis')">
+        <i class="ti ti-target" aria-hidden="true"></i>KPIs / Objetivos
+      </button>
+      <button class="nav-item" onclick="showPage('empleados')">
+        <i class="ti ti-users" aria-hidden="true"></i>Colaboradores
+      </button>
+      <button class="nav-item" onclick="showPage('reportes')">
+        <i class="ti ti-chart-bar" aria-hidden="true"></i>Reportes
+      </button>
+    </div>
+    <div class="sidebar-footer">Ciclo activo: 2025</div>
+  </nav>
+
+  <!-- Main -->
+  <div class="main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <span class="topbar-title" id="page-title">Dashboard general</span>
+        <span class="breadcrumb" id="page-breadcrumb"></span>
+      </div>
+      <div class="role-switcher" role="group" aria-label="Cambiar perfil">
+        <button class="role-btn active" onclick="setRole('rh', this)">RH</button>
+        <button class="role-btn" onclick="setRole('evaluador', this)">Evaluador</button>
+        <button class="role-btn" onclick="setRole('empleado', this)">Empleado</button>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="content" id="page-content" aria-live="polite"></main>
+
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script>
+var currentRole = 'rh';
+var currentPage = 'dashboard';
+
+/* Datos cargados desde data.js */
+var filtroMarca = 'Todas';
+var filtroArea  = 'Todas';
+
+/* â”€â”€ Helpers â”€â”€ */
+function initials(n) { return n.split(' ').map(function(w){ return w[0]; }).join('').slice(0,2); }
+
+function stars(n) {
+  var s = '';
+  for (var i = 1; i <= 5; i++)
+    s += '<span class="star' + (i <= n ? '' : ' off') + '">â˜…</span>';
+  return s;
+}
+
+function statusBadge(s) {
+  if (s === 'Completada') return '<span class="badge badge-success">Completada</span>';
+  if (s === 'En proceso') return '<span class="badge badge-warn">En proceso</span>';
+  return '<span class="badge badge-neutral">Pendiente</span>';
+}
+
+function marcaBadge(m) {
+  var c = marcaColors[m] || { bg: '#F4F4F2', color: '#6B6B69' };
+  return '<span class="badge" style="background:' + c.bg + ';color:' + c.color + '">' + m + '</span>';
+}
+
+function filterBar() {
+  return '<div style="display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap">' +
+    ['Todas','Nissan','Renault','Changan','Corporativo'].map(function(m){
+      var active = filtroMarca === m;
+      return '<button onclick="setMarca(\'' + m + '\')" style="font-size:12px;padding:4px 12px;border-radius:6px;cursor:pointer;border:0.5px solid ' + (active ? 'var(--chesa-black)' : 'var(--chesa-gray3)') + ';background:' + (active ? 'var(--chesa-black)' : 'transparent') + ';color:' + (active ? '#fff' : 'var(--chesa-gray4)') + ';font-weight:' + (active ? '600' : '400') + '">' + m + '</button>';
+    }).join('') +
+  '</div>';
+}
+
+function setMarca(m) { filtroMarca = m; renderPage(); }
+function setArea(a)  { filtroArea  = a; renderPage(); }
+
+function empsFiltrados() {
+  return employees.filter(function(e){
+    return (filtroMarca === 'Todas' || e.marca === filtroMarca);
+  });
+}
+
+function areaFilterBar() {
+  return '<div style="display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap">' +
+    ['Todas','Dir. InnovaciÃ³n','Dir. Administrativa','Dir. EstratÃ©gica','Dir. Talento Humano','Comercial','Posventa','Soporte Sucursal'].map(function(a){
+      var active = filtroArea === a;
+      var c = areaColors[a] || { bg: 'transparent', color: 'var(--chesa-gray4)' };
+      return '<button onclick="setArea(\'' + a + '\')" style="font-size:12px;padding:4px 12px;border-radius:6px;cursor:pointer;' +
+        'border:0.5px solid ' + (active ? c.color : 'var(--chesa-gray3)') + ';' +
+        'background:' + (active ? c.bg : 'transparent') + ';' +
+        'color:' + (active ? c.color : 'var(--chesa-gray4)') + ';' +
+        'font-weight:' + (active ? '600' : '400') + '">' + a + '</button>';
+    }).join('') +
+  '</div>';
+}
+
+function scoreColor(v) {
+  if (v >= 85) return '#1B6E3A';
+  if (v >= 70) return '#B45309';
+  return '#C62828';
+}
+function scoreBg(v) {
+  if (v >= 85) return '#E8F5E9';
+  if (v >= 70) return '#FFF8E1';
+  return '#FFEBEE';
+}
+function pctColor(p) {
+  if (p >= 85) return '#1B6E3A';
+  if (p >= 65) return '#B45309';
+  return '#C62828';
+}
+
+/* â”€â”€ Pages â”€â”€ */
+function renderDashboard() {
+  var emps      = empsFiltrados();
+  var completed = emps.filter(function(e){ return e.status === 'Completada'; }).length;
+  var avgScore  = emps.length ? Math.round(emps.reduce(function(a,e){ return a + e.score; }, 0) / emps.length) : 0;
+  var pending   = emps.filter(function(e){ return e.status === 'Pendiente'; }).length;
+
+  if (currentRole === 'empleado') {
+    var emp = employees[0];
+    return (
+      '<div class="metric-grid metric-grid-3">' +
+        '<div class="metric-card metric-accent"><div class="metric-label">Tu puntuaciÃ³n 360Â°</div><div class="metric-value">' + emp.score + '</div><div class="metric-sub up"><i class="ti ti-trending-up"></i> +4 vs periodo anterior</div></div>' +
+        '<div class="metric-card"><div class="metric-label">KPI promedio</div><div class="metric-value">' + emp.kpi + '%</div><div class="metric-sub up">Meta superada</div></div>' +
+        '<div class="metric-card"><div class="metric-label">Marca / DivisiÃ³n</div><div class="metric-value" style="font-size:18px;margin-top:4px">' + marcaBadge(emp.marca) + '</div></div>' +
+      '</div>' +
+      '<div class="section-card">' +
+        '<div class="section-header"><span class="section-title">Mis competencias evaluadas</span>' + statusBadge(emp.status) + '</div>' +
+        competencias.map(function(c){
+          var avg = Math.round((c.self + c.jefe + c.pares + c.sub) / 4 * 10) / 10;
+          return '<div class="comp-row"><span class="comp-label">' + c.name + '</span><div style="flex:1">' + stars(Math.round(avg)) + '</div><span class="comp-score">' + avg + '</span></div>';
+        }).join('') +
+      '</div>'
+    );
+  }
+
+  if (currentRole === 'evaluador') {
+    return (
+      '<div class="metric-grid metric-grid-3">' +
+        '<div class="metric-card metric-accent"><div class="metric-label">Colaboradores a evaluar</div><div class="metric-value">' + emps.length + '</div></div>' +
+        '<div class="metric-card"><div class="metric-label">Evaluaciones completadas</div><div class="metric-value">' + completed + '</div></div>' +
+        '<div class="metric-card"><div class="metric-label">Promedio del equipo</div><div class="metric-value">' + avgScore + '</div></div>' +
+      '</div>' +
+      '<div class="section-card">' +
+        '<div class="section-header"><span class="section-title">Estado de evaluaciones â€” mi equipo</span><span class="cycle-chip"><i class="ti ti-calendar-event" aria-hidden="true"></i>Ciclo 2025</span></div>' +
+        filterBar() +
+        '<table class="table"><thead><tr><th>Colaborador</th><th>Marca</th><th>Ãrea</th><th>Estado</th><th>PuntuaciÃ³n 360Â°</th></tr></thead><tbody>' +
+        emps.map(function(e){
+          return '<tr>' +
+            '<td><div class="emp-cell"><div class="avatar">' + initials(e.name) + '</div>' + e.name + '</div></td>' +
+            '<td>' + marcaBadge(e.marca) + '</td>' +
+            '<td style="color:var(--chesa-gray4);font-size:12px">' + e.dept + '</td>' +
+            '<td>' + statusBadge(e.status) + '</td>' +
+            '<td><div class="progress-row"><div class="progress-bar"><div class="progress-fill" style="width:' + e.score + '%;background:' + pctColor(e.score) + '"></div></div><span style="font-size:12px;font-weight:600;min-width:28px">' + e.score + '</span></div></td>' +
+          '</tr>';
+        }).join('') +
+        '</tbody></table>' +
+      '</div>'
+    );
+  }
+
+  /* RH â€” tarjetas por marca */
+  var marcaCards = marcas.map(function(m){
+    var grupo = employees.filter(function(e){ return e.marca === m; });
+    var avg = grupo.length ? Math.round(grupo.reduce(function(a,e){ return a+e.score; },0)/grupo.length) : 0;
+    var comp = grupo.filter(function(e){ return e.status==='Completada'; }).length;
+    var c = marcaColors[m];
+    return '<div class="metric-card" style="border-top:3px solid ' + c.color + '">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">' +
+        '<span style="font-size:13px;font-weight:600;color:' + c.color + '">' + m + '</span>' +
+        '<span class="badge" style="background:' + c.bg + ';color:' + c.color + '">' + grupo.length + ' colab.</span>' +
+      '</div>' +
+      '<div style="font-size:22px;font-weight:600">' + avg + '</div>' +
+      '<div class="metric-sub" style="color:var(--chesa-gray4)">' + comp + '/' + grupo.length + ' completadas</div>' +
+    '</div>';
+  }).join('');
+
+  return (
+    '<div class="metric-grid metric-grid-4">' + marcaCards + '</div>' +
+    '<div class="metric-grid metric-grid-4" style="margin-top:0">' +
+      '<div class="metric-card metric-accent"><div class="metric-label">Total colaboradores</div><div class="metric-value">' + employees.length + '</div></div>' +
+      '<div class="metric-card"><div class="metric-label">Completadas</div><div class="metric-value">' + employees.filter(function(e){return e.status==='Completada';}).length + ' / ' + employees.length + '</div><div class="metric-sub up"><i class="ti ti-trending-up"></i> +2 esta semana</div></div>' +
+      '<div class="metric-card"><div class="metric-label">Promedio global</div><div class="metric-value">' + Math.round(employees.reduce(function(a,e){return a+e.score;},0)/employees.length) + '</div></div>' +
+      '<div class="metric-card"><div class="metric-label">Pendientes</div><div class="metric-value" style="color:' + (pending > 0 ? 'var(--chesa-red)' : 'var(--chesa-green)') + '">' + employees.filter(function(e){return e.status==='Pendiente';}).length + '</div></div>' +
+    '</div>' +
+    '<div class="section-card">' +
+      '<div class="section-header"><span class="section-title">Colaboradores â€” resumen de desempeÃ±o</span><button class="btn" onclick="showPage(\'empleados\')"><i class="ti ti-users" aria-hidden="true"></i>Ver todos</button></div>' +
+      filterBar() +
+      '<table class="table"><thead><tr><th>Nombre</th><th>Marca</th><th>Ãrea</th><th>Estado</th><th>360Â°</th><th>KPI%</th></tr></thead><tbody>' +
+      emps.map(function(e){
+        return '<tr>' +
+          '<td><div class="emp-cell"><div class="avatar">' + initials(e.name) + '</div>' + e.name + '</div></td>' +
+          '<td>' + marcaBadge(e.marca) + '</td>' +
+          '<td style="color:var(--chesa-gray4);font-size:12px">' + e.dept + '</td>' +
+          '<td>' + statusBadge(e.status) + '</td>' +
+          '<td><span style="font-weight:600;color:' + scoreColor(e.score) + '">' + e.score + '</span></td>' +
+          '<td><span style="font-weight:600;color:' + pctColor(e.kpi) + '">' + e.kpi + '%</span></td>' +
+        '</tr>';
+      }).join('') +
+      '</tbody></table>' +
+    '</div>'
+  );
+}
+
+function render360() {
+  if (currentRole === 'rh') {
+    return (
+      '<div class="section-card">' +
+        '<div class="section-header"><span class="section-title">Resultados 360Â° â€” equipo completo</span><span class="cycle-chip"><i class="ti ti-calendar-event" aria-hidden="true"></i>Ciclo 2025</span></div>' +
+        '<table class="table"><thead><tr><th>Colaborador</th><th>AutoevaluaciÃ³n</th><th>Jefe directo</th><th>Pares</th><th>Promedio</th><th>Estado</th></tr></thead><tbody>' +
+        employees.map(function(e, i){
+          var sc = [78+i*3, 80+i*2, 75+i*4, 82+i];
+          var avg = Math.round(sc.reduce(function(a,b){ return a+b; }, 0) / 4);
+          return '<tr>' +
+            '<td><div class="emp-cell"><div class="avatar">' + initials(e.name) + '</div>' + e.name + '</div></td>' +
+            sc.map(function(s){ return '<td><span style="font-weight:600;color:' + scoreColor(s) + '">' + s + '</span></td>'; }).join('') +
+            '<td><div class="score-circle" style="background:' + scoreBg(avg) + ';color:' + scoreColor(avg) + '">' + avg + '</div></td>' +
+            '<td>' + statusBadge(e.status) + '</td>' +
+          '</tr>';
+        }).join('') +
+        '</tbody></table>' +
+      '</div>' +
+      '<div class="section-card">' +
+        '<div class="section-header"><span class="section-title">Comparativo de competencias â€” equipo</span></div>' +
+        '<div class="panel-360">' +
+        ['AutoevaluaciÃ³n','Jefe directo','Pares','Subordinados'].map(function(tipo, ti){
+          var keys = ['self','jefe','pares','sub'];
+          return '<div class="eval-block"><div class="eval-block-title">' + tipo + '</div>' +
+            competencias.map(function(c){
+              return '<div class="comp-row"><span class="comp-label">' + c.name + '</span>' + stars(c[keys[ti]]) + '</div>';
+            }).join('') +
+          '</div>';
+        }).join('') +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  var emp = employees[0];
+  var evalTitle = currentRole === 'evaluador' ? 'Evaluar a: ' + emp.name : 'Mi evaluaciÃ³n 360Â°';
+  return (
+    '<div class="section-card">' +
+      '<div class="section-header"><span class="section-title">' + evalTitle + '</span>' + statusBadge('En proceso') + '</div>' +
+      '<div class="tab-bar">' +
+        '<button class="tab active" onclick="switchTab(this,\'tab-auto\')">AutoevaluaciÃ³n</button>' +
+        '<button class="tab" onclick="switchTab(this,\'tab-jefe\')">Jefe directo</button>' +
+        '<button class="tab" onclick="switchTab(this,\'tab-pares\')">Pares</button>' +
+      '</div>' +
+      ['auto','jefe','pares'].map(function(key, idx){
+        var keyMap = ['self','jefe','pares'];
+        return '<div id="tab-' + key + '"' + (idx > 0 ? ' class="hidden"' : '') + '>' +
+          competencias.map(function(c){
+            return '<div class="kpi-row" style="grid-template-columns:1fr auto">' +
+              '<div style="font-size:13px">' + c.name + '</div>' +
+              '<div>' + stars(c[keyMap[idx]]) + '</div>' +
+            '</div>';
+          }).join('') +
+          '<div style="margin-top:1rem;display:flex;justify-content:flex-end"><button class="btn btn-primary"><i class="ti ti-device-floppy" aria-hidden="true"></i>Guardar evaluaciÃ³n</button></div>' +
+        '</div>';
+      }).join('') +
+    '</div>' +
+    '<div class="section-card">' +
+      '<div class="section-header"><span class="section-title">Comparativo por evaluador</span></div>' +
+      '<div class="panel-360">' +
+      ['AutoevaluaciÃ³n','Jefe directo','Pares','Subordinados'].map(function(tipo, ti){
+        var keys = ['self','jefe','pares','sub'];
+        return '<div class="eval-block"><div class="eval-block-title">' + tipo + '</div>' +
+          competencias.map(function(c){
+            return '<div class="comp-row"><span class="comp-label">' + c.name + '</span>' + stars(c[keys[ti]]) + '</div>';
+          }).join('') +
+        '</div>';
+      }).join('') +
+      '</div>' +
+    '</div>'
+  );
+}
+
+function renderKPIs() {
+  var kpisFiltrados = kpis.filter(function(k){
+    return (filtroMarca === 'Todas' || k.marca === filtroMarca) &&
+           (filtroArea  === 'Todas' || k.area  === filtroArea);
+  });
+  var avgPct   = kpisFiltrados.length ? Math.round(kpisFiltrados.reduce(function(a,k){ return a+k.pct; },0)/kpisFiltrados.length) : 0;
+  var cumplidos = kpisFiltrados.filter(function(k){ return k.status === 'success'; }).length;
+  var enRiesgo  = kpisFiltrados.filter(function(k){ return k.status === 'warn'; }).length;
+
+  return (
+    '<div class="metric-grid metric-grid-4">' +
+      '<div class="metric-card metric-accent"><div class="metric-label">KPIs activos</div><div class="metric-value">' + kpisFiltrados.length + '</div></div>' +
+      '<div class="metric-card"><div class="metric-label">Cumplimiento promedio</div><div class="metric-value">' + avgPct + '%</div></div>' +
+      '<div class="metric-card"><div class="metric-label">Cumplidos</div><div class="metric-value" style="color:var(--chesa-green)">' + cumplidos + '</div></div>' +
+      '<div class="metric-card"><div class="metric-label">En riesgo</div><div class="metric-value" style="color:var(--chesa-amber)">' + enRiesgo + '</div></div>' +
+    '</div>' +
+    '<div class="section-card">' +
+      '<div class="section-header"><span class="section-title">Indicadores de desempeÃ±o â€” Ciclo 2025</span>' +
+        (currentRole === 'rh' ? '<button class="btn btn-primary"><i class="ti ti-plus" aria-hidden="true"></i>Nuevo KPI</button>' : '') +
+      '</div>' +
+      '<div style="margin-bottom:6px"><div style="font-size:11px;color:var(--chesa-gray4);margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em">Por marca</div>' + filterBar() + '</div>' +
+      '<div style="margin-bottom:1rem"><div style="font-size:11px;color:var(--chesa-gray4);margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em">Por Ã¡rea operativa</div>' + areaFilterBar() + '</div>' +
+      (kpisFiltrados.length === 0
+        ? '<div style="text-align:center;padding:2rem;color:var(--chesa-gray4);font-size:13px">Sin KPIs para la selecciÃ³n actual.</div>'
+        : '<div style="display:grid;grid-template-columns:1fr 72px 72px 160px;padding:0 0 6px;border-bottom:0.5px solid var(--chesa-gray2)">' +
+            '<span style="font-size:11px;color:var(--chesa-gray4);text-transform:uppercase;letter-spacing:.04em">Indicador</span>' +
+            '<span style="font-size:11px;color:var(--chesa-gray4);text-align:right">Meta</span>' +
+            '<span style="font-size:11px;color:var(--chesa-gray4);text-align:right">Real</span>' +
+            '<span style="font-size:11px;color:var(--chesa-gray4)">Avance</span>' +
+          '</div>' +
+          kpisFiltrados.map(function(k){
+            return '<div class="kpi-row">' +
+              '<div>' +
+                '<div style="font-size:13px;font-weight:500">' + k.name + '</div>' +
+                '<div style="display:flex;gap:5px;margin-top:4px">' + marcaBadge(k.marca) + areaBadge(k.area) + '</div>' +
+              '</div>' +
+              '<div style="text-align:right"><div style="font-size:13px;font-weight:600">' + k.meta + '</div></div>' +
+              '<div style="text-align:right"><div style="font-size:13px;font-weight:600;color:' + pctColor(k.pct) + '">' + k.real + '</div></div>' +
+              '<div>' +
+                '<div class="progress-row"><div class="progress-bar"><div class="progress-fill" style="width:' + Math.min(k.pct,100) + '%;background:' + pctColor(k.pct) + '"></div></div><span style="font-size:12px;font-weight:600;min-width:34px">' + k.pct + '%</span></div>' +
+                '<div style="margin-top:5px"><span class="badge badge-' + (k.status === 'success' ? 'success' : 'warn') + '">' + (k.status === 'success' ? 'Cumplido' : 'En riesgo') + '</span></div>' +
+              '</div>' +
+            '</div>';
+          }).join('')
+      ) +
+    '</div>'
+  );
+}
+
+function areaBadge(a) {
+  var c = areaColors[a] || { bg: '#F4F4F2', color: '#6B6B69' };
+  return '<span class="badge" style="background:' + c.bg + ';color:' + c.color + '">' + a + '</span>';
+}
+
+function renderEmpleados() {
+  var emps = empsFiltrados();
+  var total = emps.length;
+  var comp  = emps.filter(function(e){ return e.status === 'Completada'; }).length;
+  var avg   = total ? Math.round(emps.reduce(function(a,e){ return a+e.score; },0)/total) : 0;
+
+  return (
+    '<div class="metric-grid metric-grid-3" style="margin-bottom:0">' +
+      '<div class="metric-card metric-accent"><div class="metric-label">Colaboradores</div><div class="metric-value">' + total + '</div></div>' +
+      '<div class="metric-card"><div class="metric-label">Evaluaciones completadas</div><div class="metric-value">' + comp + ' / ' + total + '</div></div>' +
+      '<div class="metric-card"><div class="metric-label">PuntuaciÃ³n promedio</div><div class="metric-value">' + avg + '</div></div>' +
+    '</div>' +
+    '<div class="section-card">' +
+      '<div class="section-header"><span class="section-title">Directorio de colaboradores</span>' +
+        (currentRole === 'rh' ? '<button class="btn btn-primary"><i class="ti ti-user-plus" aria-hidden="true"></i>Agregar colaborador</button>' : '') +
+      '</div>' +
+      filterBar() +
+      '<table class="table"><thead><tr><th>Colaborador</th><th>Marca</th><th>Ãrea operativa</th><th>Departamento</th><th>360Â°</th><th>KPI%</th><th>Estado 2025</th></tr></thead><tbody>' +
+      emps.map(function(e){
+        var c = marcaColors[e.marca];
+        return '<tr>' +
+          '<td><div class="emp-cell"><div class="avatar" style="background:' + c.color + '">' + initials(e.name) + '</div><span style="font-size:13px;font-weight:500">' + e.name + '</span></div></td>' +
+          '<td>' + marcaBadge(e.marca) + '</td>' +
+          '<td>' + areaBadge(e.area) + '</td>' +
+          '<td style="color:var(--chesa-gray4);font-size:12px">' + e.dept + '</td>' +
+          '<td><div class="progress-row"><div class="progress-bar"><div class="progress-fill" style="width:' + e.score + '%;background:' + pctColor(e.score) + '"></div></div><span style="font-size:12px;font-weight:600">' + e.score + '</span></div></td>' +
+          '<td><span style="font-size:13px;font-weight:600;color:' + pctColor(e.kpi) + '">' + e.kpi + '%</span></td>' +
+          '<td>' + statusBadge(e.status) + '</td>' +
+        '</tr>';
+      }).join('') +
+      '</tbody></table>' +
+    '</div>'
+  );
+}
+
+function renderReportes() {
+  var reports = [
+    { icon: 'ti-file-spreadsheet', title: 'Reporte 360Â° â€” equipo',    desc: 'Resultados de autoevaluaciÃ³n y evaluadores por colaborador' },
+    { icon: 'ti-chart-bar',        title: 'Reporte de KPIs',          desc: 'Cumplimiento de indicadores por Ã¡rea y colaborador'         },
+    { icon: 'ti-trophy',           title: 'Ranking de desempeÃ±o',     desc: 'ClasificaciÃ³n de colaboradores por puntuaciÃ³n global'       },
+    { icon: 'ti-calendar-stats',   title: 'HistÃ³rico de ciclos',      desc: 'Comparativo de desempeÃ±o entre periodos anteriores'         },
+  ];
+  return (
+    '<div class="metric-grid metric-grid-4">' +
+      '<div class="metric-card metric-accent"><div class="metric-label">PerÃ­odo activo</div><div class="metric-value">2025</div><div class="metric-sub" style="color:var(--chesa-gray4)">Ene â€“ Dic</div></div>' +
+      '<div class="metric-card"><div class="metric-label">Evaluaciones totales</div><div class="metric-value">25</div></div>' +
+      '<div class="metric-card"><div class="metric-label">Departamentos</div><div class="metric-value">5</div></div>' +
+      '<div class="metric-card"><div class="metric-label">Promedio global</div><div class="metric-value">80</div></div>' +
+    '</div>' +
+    '<div class="section-card">' +
+      '<div class="section-header"><span class="section-title">Exportar reportes</span></div>' +
+      '<div class="report-grid">' +
+      reports.map(function(r){
+        return '<div class="report-card">' +
+          '<i class="ti ' + r.icon + '" aria-hidden="true"></i>' +
+          '<div class="report-card-title">' + r.title + '</div>' +
+          '<div class="report-card-desc">' + r.desc + '</div>' +
+          '<button class="btn" style="align-self:flex-start;margin-top:4px"><i class="ti ti-download" aria-hidden="true"></i>Descargar</button>' +
+        '</div>';
+      }).join('') +
+      '</div>' +
+    '</div>'
+  );
+}
+
+/* â”€â”€ Routing â”€â”€ */
+function showPage(page) {
+  currentPage = page;
+  var titles = { dashboard: 'Dashboard general', '360': 'EvaluaciÃ³n 360Â°', kpis: 'KPIs / Objetivos', empleados: 'Colaboradores', reportes: 'Reportes' };
+  document.getElementById('page-title').textContent = titles[page];
+  document.querySelectorAll('.nav-item').forEach(function(b){ b.classList.remove('active'); });
+  var order = ['dashboard','360','kpis','empleados','reportes'];
+  var idx = order.indexOf(page);
+  if (idx >= 0) document.querySelectorAll('.nav-item')[idx].classList.add('active');
+  renderPage();
+}
+
+function renderPage() {
+  var html = '';
+  if (currentPage === 'dashboard') html = renderDashboard();
+  else if (currentPage === '360')  html = render360();
+  else if (currentPage === 'kpis') html = renderKPIs();
+  else if (currentPage === 'empleados') html = renderEmpleados();
+  else if (currentPage === 'reportes') html = renderReportes();
+  document.getElementById('page-content').innerHTML = html;
+}
+
+function setRole(role, btn) {
+  currentRole = role;
+  document.querySelectorAll('.role-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  renderPage();
+}
+
+function switchTab(btn, tabId) {
+  document.querySelectorAll('.tab').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  ['tab-auto','tab-jefe','tab-pares'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.classList.toggle('hidden', id !== tabId);
+  });
+}
+
+renderPage();
+</script>
+</body>
+</html>
